@@ -21,7 +21,8 @@ RF24 radio(7, 8); // CE, CSN
 const byte address[6] = "00001";
 const int led_pin = 2;
 const int red_button_pin = 3;
-int red_button_value = HIGH;
+boolean red_on = false;
+boolean red_button_down = false;
 
 void setup() {
   radio.begin();
@@ -30,17 +31,30 @@ void setup() {
   radio.stopListening();
 
   pinMode(led_pin, OUTPUT);
-  pinMode(red_button_pin, INPUT);
+  pinMode(red_button_pin, INPUT); 
+  digitalWrite(led_pin, LOW);
 }
 
 void loop() {
-  //const char text[] = "Hello World";
-  //radio.write(&text, sizeof(text));
-  red_button_value = digitalRead(red_button_pin);
-  if(red_button_value == LOW) {
-    digitalWrite(led_pin, HIGH);
+  if(digitalRead(red_button_pin) == LOW) {
+    red_button_down = true; 
   }
   else {
-    digitalWrite(led_pin, LOW);
+      if(red_button_down == true)
+      {
+        red_on = !red_on;
+        digitalWrite(led_pin, red_on);
+        char CMD[7];
+        if(red_on){
+          String str = "REDON ";
+          str.toCharArray(CMD, 7);
+        }
+        else {
+          String str = "REDOFF";
+          str.toCharArray(CMD, 7);
+        }
+        radio.write(&CMD, sizeof(CMD));
+      }
+      red_button_down = false;
   }
 }
