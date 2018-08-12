@@ -38,7 +38,6 @@ void loop() {
     break;
        
   }
-  delay(random(10000,120000));
 }
 
 void pulse() {
