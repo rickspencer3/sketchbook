@@ -15,8 +15,10 @@ const int ORANGE_PIN = 8;
 
 int state = HIGH;
 
-int leds[] = {RED_PIN, YELLOW_PIN, WHITE_PIN, BLUE_PIN, GREEN_PIN, PURPLE_PIN, ORANGE_PIN};
-const int ledCount = 7;
+int led_pins[] = {RED_PIN, YELLOW_PIN, WHITE_PIN, BLUE_PIN, GREEN_PIN, PURPLE_PIN, ORANGE_PIN};
+String led_strs[] = {"RED", "YEL", "WHI", "BLU", "GRE", "PUR", "ORA"};
+boolean led_states[] = {false, false, false, false, false, false, false};
+const int led_count = 7;
 
 void setup() {
   Serial.begin(9600);
@@ -26,9 +28,9 @@ void setup() {
   radio.setPALevel(RF24_PA_MIN);
   radio.startListening();
   
-  for(int i = 0; i < ledCount; i++)
+  for(int i = 0; i < led_count; i++)
   {
-    pinMode(leds[i], OUTPUT);    
+    pinMode(led_pins[i], OUTPUT);    
   }
 }
 
@@ -43,8 +45,8 @@ void loop() {
 
     }
     led_chars[3]='\0';
-    String led(led_chars);
-    
+    String req_led(led_chars);
+   
     char command_chars[4];
     int j = 0;
     for(int i = 3; i < 6; i++ ) {
@@ -54,51 +56,101 @@ void loop() {
     command_chars[3]='\0';
     String command(command_chars);
     
-    pin_command(led, command);
+    if(req_led == "NON")
+    {
+      do_all_command(command);
+    }
+    
+    else {
+    set_pin_state(req_led, command);
+    light_leds();
+    }
   }
 }
 
-void pin_command(String led, String command) { 
-  int pin = 0;
-  if(led == "RED") {
-    pin = 2;
+void do_all_command(String command) {
+  if(command == "PLS")
+  {
+    temp_off_leds();
+    pulse();
+    reverse_pulse(); 
   }
-  if(command == "ON ") digitalWrite(pin, HIGH);
-  else if(command == "OFF") digitalWrite(pin, LOW);
+  light_leds();
 }
 
+void temp_off_leds() {
+  for(int i = 0 ; i < led_count; i++) {
+    digitalWrite(led_pins[i], LOW); 
+  }
+}
+
+void light_leds() {
+  for(int i = 0 ; i < led_count; i++) {
+    if(led_states[i])
+    {
+      digitalWrite(led_pins[i], HIGH);
+    }
+    else {
+      digitalWrite(led_pins[i], LOW);
+    }
+  } 
+}
+
+void set_pin_state(String req_led, String command) { 
+  
+  //try to match the requested led color to one of the support leds
+  int pin_index = -1;
+  
+  for(int i = 0 ; i < led_count; i++)
+  {
+     if(led_strs[i] == req_led) {
+       pin_index = i;
+       break;
+     }
+  }
+  
+  if(pin_index == -1) return; //led color not found, exit doing nothing
+  
+  int pin = led_pins[pin_index]; //get the pin number for the requested pin color
+  
+  //set the pin states
+  if(command == "ON ") led_states[pin_index] = true;
+  else if(command == "OFF")  led_states[pin_index] = false;
+  
+}
+ 
 void pulse() {
- for(int i = 0; i < ledCount; i++) {
-    digitalWrite(leds[i], HIGH);
+ for(int i = 0; i < led_count; i++) {
+    digitalWrite(led_pins[i], HIGH);
     delay(100);
-    digitalWrite(leds[i], LOW);
+    digitalWrite(led_pins[i], LOW);
   }
 }
 
 void reverse_pulse() {
-   for(int i = (ledCount - 1) ; i >= 0 ; i--) {
-    digitalWrite(leds[i], HIGH);
+   for(int i = (led_count - 1) ; i >= 0 ; i--) {
+    digitalWrite(led_pins[i], HIGH);
     delay(100);
-    digitalWrite(leds[i], LOW);
+    digitalWrite(led_pins[i], LOW);
   }
 }
 
 void randomize() {
-int pin = random(0, ledCount);
-digitalWrite(leds[pin], HIGH);
+int pin = random(0, led_count);
+digitalWrite(led_pins[pin], HIGH);
 delay(random(50,500));
-digitalWrite(leds[pin], LOW);
+digitalWrite(led_pins[pin], LOW);
 }
 
 void blink() {
-  for(int i = 0; i < ledCount; i++)
+  for(int i = 0; i < led_count; i++)
   {  
-    digitalWrite(leds[i], HIGH);
+    digitalWrite(led_pins[i], HIGH);
   }
   delay(200); 
-  for(int i = 0; i < ledCount; i++)
+  for(int i = 0; i < led_count; i++)
   {  
-    digitalWrite(leds[i], LOW);
+    digitalWrite(led_pins[i], LOW);
   } 
   delay(200); 
 }
