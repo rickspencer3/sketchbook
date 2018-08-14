@@ -34,8 +34,11 @@ void setup() {
 }
 
 void loop() {
-  if (Serial.available()>6) {
-    serIn=Serial.read()
-    radio.write(&serIn, sizeof(serIn));
+  if (Serial.available()) {
+    String command = Serial.readString();
+    Serial.println("Recieved: " + command);
+    char CMD[7];
+    command.toCharArray(CMD, sizeof(CMD));
+    radio.write(&CMD, sizeof(CMD));
   }
 }
