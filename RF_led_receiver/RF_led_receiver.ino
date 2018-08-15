@@ -61,11 +61,17 @@ void loop() {
     
     if(req_led == "NON")
     {
-      do_all_command(command);
+      do_none_command(command);
     }
-    
+    else if (req_led == "ALL"){
+      for(int i = 0; i < led_count; i++)
+      {
+        set_pin_state(i, command);
+      }
+    }
     else {
-    set_pin_state(req_led, command);
+    int index = get_index_for_color(req_led);
+    set_pin_state(index, command);
     light_leds();
     }
   }
@@ -81,14 +87,14 @@ void blink_leds() {
     if(led_states[i] == 2) {
       digitalWrite(led_pins[i], blink_state);
     }
-    blink_state == LOW ? blink_state = HIGH : blink_state = LOW;
+    blink_state == LOW ? blink_state = HIGH : blink_state = LOW;  
   }
 }
 
-void do_all_command(String command) {
+void do_none_command(String command) {
+  temp_off_leds();
   if(command == "PLS")
   {
-    temp_off_leds();
     pulse();
     reverse_pulse(); 
   }
@@ -113,9 +119,8 @@ void light_leds() {
   } 
 }
 
-void set_pin_state(String req_led, String command) { 
-  
-  //try to match the requested led color to one of the support leds
+int get_index_for_color(String req_led) {
+    //try to match the requested led color to one of the support leds
   int pin_index = -1;
   
   for(int i = 0 ; i < led_count; i++)
@@ -126,14 +131,15 @@ void set_pin_state(String req_led, String command) {
      }
   }
   
-  if(pin_index == -1) return; //led color not found, exit doing nothing
-  
-  int pin = led_pins[pin_index]; //get the pin number for the requested pin color
-  
+  return pin_index;
+}
+
+void set_pin_state(int pin_index, String command) { 
+ 
   //set the pin states
   if(command == "ON ") led_states[pin_index] = 1;
   else if(command == "OFF")  led_states[pin_index] = 0;
-  
+  else if(command == "BLI") led_states[pin_index] = 2;
 }
  
 void pulse() {
@@ -157,18 +163,5 @@ int pin = random(0, led_count);
 digitalWrite(led_pins[pin], HIGH);
 delay(random(50,500));
 digitalWrite(led_pins[pin], LOW);
-}
-
-void blink() {
-  for(int i = 0; i < led_count; i++)
-  {  
-    digitalWrite(led_pins[i], HIGH);
-  }
-  delay(200); 
-  for(int i = 0; i < led_count; i++)
-  {  
-    digitalWrite(led_pins[i], LOW);
-  } 
-  delay(200); 
 }
 
