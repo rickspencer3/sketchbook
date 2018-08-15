@@ -12,13 +12,16 @@ const int BLUE_PIN = 5;
 const int GREEN_PIN = 6;
 const int PURPLE_PIN = 7;
 const int ORANGE_PIN = 8;
-
-int state = HIGH;
+ 
+unsigned long last_time = 0;    
 
 int led_pins[] = {RED_PIN, YELLOW_PIN, WHITE_PIN, BLUE_PIN, GREEN_PIN, PURPLE_PIN, ORANGE_PIN};
 String led_strs[] = {"RED", "YEL", "WHI", "BLU", "GRE", "PUR", "ORA"};
-boolean led_states[] = {false, false, false, false, false, false, false};
+int led_states[] = {0, 0, 0, 0, 0, 0, 0};//0 = off, 1 = on, 2 = blinking
 const int led_count = 7;
+const int blink_rate = 500;
+
+int blink_state = LOW;
 
 void setup() {
   Serial.begin(9600);
@@ -66,6 +69,20 @@ void loop() {
     light_leds();
     }
   }
+  unsigned long now = millis(); 
+  if(now - last_time > blink_rate){
+     blink_leds();
+     last_time = now;
+  }
+}
+
+void blink_leds() {
+  for(int i = 0 ; i < led_count; i++) {
+    if(led_states[i] == 2) {
+      digitalWrite(led_pins[i], blink_state);
+    }
+    blink_state == LOW ? blink_state = HIGH : blink_state = LOW;
+  }
 }
 
 void do_all_command(String command) {
@@ -86,7 +103,7 @@ void temp_off_leds() {
 
 void light_leds() {
   for(int i = 0 ; i < led_count; i++) {
-    if(led_states[i])
+    if(led_states[i] == 1)
     {
       digitalWrite(led_pins[i], HIGH);
     }
@@ -114,8 +131,8 @@ void set_pin_state(String req_led, String command) {
   int pin = led_pins[pin_index]; //get the pin number for the requested pin color
   
   //set the pin states
-  if(command == "ON ") led_states[pin_index] = true;
-  else if(command == "OFF")  led_states[pin_index] = false;
+  if(command == "ON ") led_states[pin_index] = 1;
+  else if(command == "OFF")  led_states[pin_index] = 0;
   
 }
  
