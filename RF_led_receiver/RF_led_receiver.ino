@@ -68,6 +68,7 @@ void loop() {
       {
         set_pin_state(i, command);
       }
+      light_leds();
     }
     else {
     int index = get_index_for_color(req_led);
@@ -87,13 +88,13 @@ void blink_leds() {
     if(led_states[i] == 2) {
       digitalWrite(led_pins[i], blink_state);
     }
-    blink_state == LOW ? blink_state = HIGH : blink_state = LOW;  
   }
+    blink_state == LOW ? blink_state = HIGH : blink_state = LOW;
 }
 
 void do_none_command(String command) {
   temp_off_leds();
-  if(command == "PLS")
+  if(command == "PUL")
   {
     pulse();
     reverse_pulse(); 
@@ -135,7 +136,6 @@ int get_index_for_color(String req_led) {
 }
 
 void set_pin_state(int pin_index, String command) { 
- 
   //set the pin states
   if(command == "ON ") led_states[pin_index] = 1;
   else if(command == "OFF")  led_states[pin_index] = 0;
