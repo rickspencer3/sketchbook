@@ -16,7 +16,7 @@
 #include <nRF24L01.h>
 #include <RF24.h>
       
-RF24 radio(7, 8); // CE, CSN
+RF24 radio(8, 7); 
 
 const byte address[6] = "00001";
 boolean red_on = false;
@@ -29,11 +29,13 @@ void setup() {
   radio.stopListening();
 
   Serial.begin(9600);
+  radio.write(&CMD, sizeof(CMD));  
 }
 
 void loop() {
   if (Serial.available()) {
     String command = Serial.readString();
+    Serial.println("sending: " + command);
     char CMD[7];
     command.toCharArray(CMD, sizeof(CMD));
     radio.write(&CMD, sizeof(CMD));
