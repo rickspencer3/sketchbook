@@ -26,7 +26,7 @@ unsigned long last_time = 0;
 void setup() {
   radio.begin();
   radio.openWritingPipe(address);
-  radio.setPALevel(RF24_PA_MIN);
+  radio.setPALevel(RF24_PA_LOW);
   radio.stopListening();
 
   //set up the USB  and the pin
