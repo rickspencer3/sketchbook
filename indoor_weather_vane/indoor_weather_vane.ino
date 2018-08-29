@@ -63,11 +63,11 @@ void refresh()
   else if(humidity < 60) {
    setColor(255, 255, 0) ;
   }
-  else if(humidity > 75) {
-    setColor(0, 255, 255);
+  else if(humidity < 75) {
+    setColor(254, 255, 0);
   }
   else {
-    setColor(254, 255, 0);//red is very bright compared to blue
+    setColor(0, 255, 255  );//red is very bright compared to blue
   }
   
   //print out the results to serial
