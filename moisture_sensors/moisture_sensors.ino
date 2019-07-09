@@ -6,6 +6,7 @@
 dht DHT;
 int moisturePin = A0;
 int dhtPin = A2;
+int lightPin = A4;
 int powerPin = 8;
 int oneWirePin = 2;
 
@@ -17,7 +18,7 @@ void setup()
   Serial.begin(9600);
 
   sensors.begin();
-  
+   
   pinMode(powerPin, OUTPUT);
   digitalWrite(powerPin, LOW);
   
@@ -38,10 +39,13 @@ void loop()
   sensors.requestTemperatures();
   float soilTemperatureReading = sensors.getTempCByIndex(0);
   
-  Serial.println("sensor=moisture1:reading=" + floatToString(moistureSenorReading));
-  Serial.println("sensor=temp:reading=" + floatToString(airTemperatureReading));
-  Serial.println("sensor=temp:reading=" + floatToString(himudityReading)); 
-  Serial.println("sensor=temp:reading=" + floatToString(soilTemperatureReading)); 
+  float lightReading = analogRead(lightPin);
+  
+  Serial.println("sensor=soilMoisture:reading=" + floatToString(moistureSenorReading));
+  Serial.println("sensor=airTemp:reading=" + floatToString(airTemperatureReading));
+  Serial.println("sensor=humidity:reading=" + floatToString(himudityReading)); 
+  Serial.println("sensor=soilTemp:reading=" + floatToString(soilTemperatureReading)); 
+  Serial.println("sensor=light:reading=" + floatToString(lightReading)); 
   
   digitalWrite(powerPin, LOW);
   delay(3000);
