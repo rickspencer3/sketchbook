@@ -1,3 +1,9 @@
+#include <SPI.h>
+#include <RF24.h>
+#include <RF24_config.h>
+#include <nRF24L01.h>
+#include <printf.h>
+
 #include<stdlib.h>
 #include <dht.h>
 #include <OneWire.h>
@@ -7,11 +13,15 @@ dht DHT;
 int moisturePin = A0;
 int dhtPin = A2;
 int lightPin = A4;
-int powerPin = 8;
+int powerPin = 0;
 int oneWirePin = 2;
 
 OneWire oneWire(oneWirePin);
 DallasTemperature sensors(&oneWire);
+RF24 radio(7, 8); // CE, CSN
+const byte address[6] = "10101";
+
+String deviceCode = "01";
   
 void setup() 
 {
@@ -22,6 +32,11 @@ void setup()
   pinMode(powerPin, OUTPUT);
   digitalWrite(powerPin, LOW);
   
+  radio.begin();
+  radio.openWritingPipe(address);
+  radio.setPALevel(RF24_PA_MIN);
+  radio.stopListening();
+  
   Serial.println("Begin Reading");
   Serial.println("-------------");
 }
@@ -30,34 +45,40 @@ void loop()
 {
   digitalWrite(powerPin, HIGH);
   delay(10);
-  float moistureSenorReading = analogRead(moisturePin);
+  int moistureSenorReading = analogRead(moisturePin);
   
   DHT.read11(dhtPin);
-  float airTemperatureReading = DHT.temperature;
-  float himudityReading = DHT.humidity;
+  int airTemperatureReading = DHT.temperature;
+  int himudityReading = DHT.humidity;
   
   sensors.requestTemperatures();
-  float soilTemperatureReading = sensors.getTempCByIndex(0);
+  int soilTemperatureReading = sensors.getTempCByIndex(0);
   
-  float lightReading = analogRead(lightPin);
+  int lightReading = analogRead(lightPin);
   
-  Serial.println("sensor=soilMoisture:reading=" + floatToString(moistureSenorReading));
-  Serial.println("sensor=airTemp:reading=" + floatToString(airTemperatureReading));
-  Serial.println("sensor=humidity:reading=" + floatToString(himudityReading)); 
-  Serial.println("sensor=soilTemp:reading=" + floatToString(soilTemperatureReading)); 
-  Serial.println("sensor=light:reading=" + floatToString(lightReading)); 
+  Serial.println(transmitReading("SM",moistureSenorReading));
+  Serial.println(transmitReading("AT",airTemperatureReading));
+  Serial.println(transmitReading("HU",himudityReading));
+  Serial.println(transmitReading("ST",soilTemperatureReading));
+  Serial.println(transmitReading("LI",lightReading));
   
   digitalWrite(powerPin, LOW);
   delay(3000);
-  /*for(int i = 0; i < 20; i++){
-    delay(30000);
-  }*/
 }
 
-String floatToString(float reading) {
-  char tempBuffer[15];
-  dtostrf(reading,5   , 2, tempBuffer);
-  return String(tempBuffer);
+String transmitReading(String sensor, int reading) {
+ String transmitString = deviceCode + sensor +  paddedString(reading);
+ char r[8];
+ transmitString.toCharArray(r,8);
+ radio.write(&r, sizeof(r));
+ return transmitString;
 }
 
-
+String paddedString(int reading) {
+  if(reading < 0) return "ERR";
+  
+  String str = String(reading);
+  if(reading < 10) str = "00"  + str;
+  else if(reading < 100) str = "0" + str;
+  return str;
+}
