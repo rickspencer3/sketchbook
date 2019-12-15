@@ -16,11 +16,11 @@ DallasTemperature sensors(&oneWire);
 String deviceCode = "01";
 
 void setup() 
-{
+{ 
   Serial.begin(9600);
 
   sensors.begin();
-
+                                                                                                                                                      
   pinMode(powerPin, OUTPUT);
   digitalWrite(powerPin, LOW);
 
@@ -50,7 +50,7 @@ void loop()
   Serial.println(transmitString("LI",lightReading));
 
   digitalWrite(powerPin, LOW);
-  delay(3000);
+  delay(60000);
 }
 
 String transmitString(String sensor, int reading) {
